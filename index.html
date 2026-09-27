@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Certificate Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Pinyon+Script&family=Sacramento&family=Allura&family=Alex+Brush&family=Satisfy&family=Pacifico&family=Tangerine:wght@400;700&family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Lato:ital,wght@0,400;0,700;1,400&family=Raleway:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ── Header ───────────────────────────────────────── -->
+<header>
+  <div class="logo-icon">🏅</div>
+  <h1>Certificate Generator</h1>
+  <span>— drop Excel columns onto the canvas to place them</span>
+</header>
+
+<!-- ── App ──────────────────────────────────────────── -->
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" style="display:none">
+
+    <!-- Excel Import -->
+    <div class="section">
+      <div class="section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Excel Import
+        <span class="name-count" id="excelCount" style="display:none">0 rows</span>
+      </div>
+
+      <div class="field">
+        <label>Upload .xlsx / .xls / .csv — all columns become draggable fields</label>
+        <div class="upload-area" id="excelUploadArea">
+          <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" />
+          <div class="upload-inner">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span id="excelUploadLabel">Click to upload or drag &amp; drop</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview table -->
+      <div id="excelPreviewWrap" style="display:none">
+        <div class="excel-preview-header">
+          <span id="excelPreviewTitle">Preview</span>
+          <button class="chip-btn danger" id="btnClearExcel" type="button">Clear</button>
+        </div>
+        <div class="excel-table-wrap">
+          <table class="excel-table" id="excelTable">
+            <thead id="excelTableHead"><tr><th>#</th><th>Name</th><th>Phone</th></tr></thead>
+            <tbody id="excelTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column Fields (shown after Excel upload) -->
+    <div class="section" id="columnFieldsSection" style="display:none">
+      <div class="section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Column Fields
+        <span style="margin-left:auto;font-size:10px;font-weight:400;color:var(--text-muted);">drag to canvas</span>
+      </div>
+      <p class="field-hint" style="margin-bottom:10px">Drag any column chip onto the certificate canvas to place it. Click a placed field to select and reposition it.</p>
+      <div class="column-chips" id="columnChips"></div>
+    </div>
+
+    <!-- Typography -->
+    <div class="section">
+      <div class="section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        Typography
+        <span class="active-field-label" id="activeFieldLabel">no field selected</span>
+      </div>
+
+      <div class="field">
+        <label>Font Family</label>
+        <div class="font-picker" id="fontPicker">
+          <button class="font-trigger" id="fontTrigger" type="button">
+            <span id="fontTriggerLabel">Great Vibes</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="font-dropdown" id="fontDropdown"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Size (px)</label>
+          <input type="number" id="fontSize" value="72" min="10" max="300" step="2" />
+        </div>
+        <div class="field">
+          <label>Color</label>
+          <div class="color-row">
+            <input type="color" id="fontColor" value="#2c1a0e" />
+            <input type="text" id="fontColorHex" value="#2c1a0e" placeholder="#hex" maxlength="7" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Style</label>
+        <div class="btn-group">
+          <button class="toggle-btn" id="boldBtn" type="button"><b>B</b></button>
+          <button class="toggle-btn" id="italicBtn" type="button"><i>I</i></button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Alignment</label>
+        <div class="btn-group">
+          <button class="toggle-btn align-btn" data-align="left"   type="button">⫷</button>
+          <button class="toggle-btn align-btn active" data-align="center" type="button">☰</button>
+          <button class="toggle-btn align-btn" data-align="right"  type="button">⫸</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Text Transform</label>
+        <div class="btn-group">
+          <button class="toggle-btn transform-btn active" data-transform="none"       type="button" title="No transform">Aa</button>
+          <button class="toggle-btn transform-btn"        data-transform="uppercase"  type="button" title="ALL UPPERCASE">AA</button>
+          <button class="toggle-btn transform-btn"        data-transform="titlecase"  type="button" title="Title Case">Ab</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download -->
+    <div class="section">
+      <div class="section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download
+      </div>
+
+      <div class="btn-group-action">
+        <button class="btn btn-outline" id="btnDownload" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Preview (1st row)
+        </button>
+
+        <button class="btn btn-success" id="btnBulk" disabled type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download All as ZIP
+        </button>
+
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-label" id="progressLbl">Generating…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WhatsApp -->
+    <div class="section">
+      <div class="section-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        Send on WhatsApp
+        <span class="smtp-status-badge unconfigured" id="waStatusBadge">Not connected</span>
+      </div>
+
+      <div class="btn-group-action" style="margin-top:4px">
+        <button class="btn btn-outline" id="btnOpenWa" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="21" y2="21"/><line x1="21" y1="14" x2="14" y2="21"/></svg>
+          Connect WhatsApp (QR)
+        </button>
+
+        <div class="row">
+          <div class="field" style="max-width:110px">
+            <label>Country code</label>
+            <input type="text" id="waCountryCode" value="91" maxlength="4" />
+          </div>
+          <div class="field">
+            <label>Phone column</label>
+            <select id="waPhoneColumn"><option value="">Upload Excel first</option></select>
+          </div>
+        </div>
+
+        <button class="btn compose-btn" id="btnOpenCompose" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Write Message
+        </button>
+        <div class="compose-summary" id="composeSummary">No message set</div>
+      </div>
+
+      <div class="btn-group-action" style="margin-top:8px">
+        <button class="btn btn-whatsapp" id="btnSendWa" type="button" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send Certificates on WhatsApp
+        </button>
+        <button class="btn btn-outline" id="btnStopWa" type="button" style="display:none">Stop sending</button>
+
+        <div class="progress-wrap" id="waProgressWrap">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="waProgressFill"></div>
+          </div>
+          <div class="progress-label" id="waProgressLbl">Sending…</div>
+        </div>
+
+        <div id="waResultLog" class="email-log" style="display:none"></div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Canvas Area -->
+  <main class="canvas-wrap" id="canvasWrap">
+
+    <!-- Certificate drop zone (shown on first load, before any template is uploaded) -->
+    <div id="certDropZone" class="cert-drop-zone">
+      <input type="file" id="certFileInput" accept="image/png,image/jpeg,image/webp,image/gif" />
+      <div class="cert-drop-inner">
+        <div class="cert-drop-icon">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1">
+            <rect x="3" y="3" width="18" height="18" rx="2.5"/>
+            <path d="M3 16l5-5 4 4 3-3 6 5.5"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+          </svg>
+        </div>
+        <div class="cert-drop-title">Drop your certificate here</div>
+        <div class="cert-drop-sub">Drag &amp; drop or click to browse</div>
+        <div class="cert-drop-formats">PNG &nbsp;·&nbsp; JPG &nbsp;·&nbsp; WebP</div>
+      </div>
+    </div>
+
+    <!-- Change certificate button (shown after a template is loaded) -->
+    <button id="changeTemplateBtn" class="change-template-btn" type="button" title="Upload a different certificate">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Change Certificate
+    </button>
+
+    <!-- Row indicator bar (shown when a specific row is selected for editing) -->
+    <div class="row-indicator" id="rowIndicator" style="display:none">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="rowIndicatorLabel">Row 1 of 1</span>
+      <div class="row-indicator-actions">
+        <button class="row-indicator-btn danger" id="btnResetRowOverride" type="button" title="Clear custom overrides for this row">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          Reset row
+        </button>
+        <button class="row-indicator-btn" id="btnExitRowEdit" type="button" title="Return to default view">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Exit row edit
+        </button>
+      </div>
+    </div>
+
+    <div class="canvas-container" id="canvasContainer" style="display:none">
+      <canvas id="previewCanvas"></canvas>
+    </div>
+    <p class="canvas-hint" id="canvasHint" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+      Drag a column chip from the sidebar onto the canvas — drag a field to move it, press Delete to remove the selected one
+    </p>
+
+    <div class="zoom-controls">
+      <button class="zoom-btn" id="zoomOut" type="button" title="Zoom out">−</button>
+      <div class="zoom-level" id="zoomLbl">65%</div>
+      <button class="zoom-btn" id="zoomIn"  type="button" title="Zoom in">+</button>
+    </div>
+  </main>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ── WhatsApp Connect Modal ─────────────────────────── -->
+<div class="modal-overlay" id="waModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-labelledby="waModalTitle">
+    <div class="modal-header">
+      <div class="modal-title" id="waModalTitle">Connect WhatsApp</div>
+      <button class="modal-close" id="waModalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="wa-connect" id="waConnectBody">
+        <div class="wa-qr-box" id="waQrBox"><div class="wa-spinner"></div></div>
+        <div class="wa-connect-text" id="waConnectText">Starting WhatsApp… this can take up to a minute the first time.</div>
+        <ol class="wa-steps" id="waSteps">
+          <li>Open WhatsApp on your phone</li>
+          <li>Tap <b>⋮ / Settings → Linked devices → Link a device</b></li>
+          <li>Scan this QR code</li>
+        </ol>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="btnWaLogout" type="button" style="display:none">Log out</button>
+      <button class="btn btn-done" id="waModalDone" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Message Compose Modal ──────────────────────────── -->
+<div class="modal-overlay" id="emailModal" aria-hidden="true">
+  <div class="modal modal-wide" role="dialog" aria-labelledby="emailModalTitle">
+    <div class="modal-header">
+      <div class="modal-title" id="emailModalTitle">WhatsApp Message</div>
+      <button class="modal-close" id="emailModalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Variables — click to insert at cursor</label>
+        <div class="var-chips" id="varChips">
+          <span class="var-chip-hint">Upload an Excel file to see column variables</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Message (sent as the caption of the certificate image)</label>
+        <div class="rich-toolbar" id="richToolbar">
+          <button type="button" class="rich-btn" data-wrap="*" title="Bold"><b>B</b></button>
+          <button type="button" class="rich-btn" data-wrap="_" title="Italic"><i>I</i></button>
+          <button type="button" class="rich-btn" data-wrap="~" title="Strikethrough"><s>S</s></button>
+          <div class="rich-divider"></div>
+          <button type="button" class="rich-btn rich-btn-text" id="btnSaveTemplate" title="Save current message as a reusable template">Save Template</button>
+          <select id="templateSelect" class="template-select" title="Load a saved template">
+            <option value="">Load Template…</option>
+          </select>
+        </div>
+        <textarea id="emailBody" class="email-body-editor wa-textarea"
+          placeholder="Hi {{firstName}} 🎉&#10;&#10;Congratulations! Here is your certificate.&#10;&#10;Regards,&#10;The Team"></textarea>
+        <div class="field-hint">Variables are replaced for each person. <b>{{firstName}}</b> comes from the name column automatically. WhatsApp formatting: *bold*, _italic_, ~strike~.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-done" id="emailModalDone" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
